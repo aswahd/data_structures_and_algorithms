@@ -1,10 +1,10 @@
-from stack_singly_linked_list import LinkedStack
+from queue_linked_list import LinkedQueue
 # Build a linked list
-array = LinkedStack()
-array.push(1)
-array.push(10)
-array.push(5)
-array.push(2)
+array = LinkedQueue()
+array.enqueue(1)
+array.enqueue(10)
+array.enqueue(5)
+array.enqueue(2)
 # Reverse the linked list
 
 
