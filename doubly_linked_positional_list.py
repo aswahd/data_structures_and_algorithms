@@ -71,11 +71,11 @@ class PositionalList(DoublyLinkedListBase):
     def add_last(self, e):
         return self.insert_between(e, self._trailer._prev, self._trailer)
 
-    def add_before(self, e, p):
+    def add_before(self, p, e):
         node = self._validate(p)
         return self.insert_between(e, node._prev, node)
 
-    def add_after(self, e, p):
+    def add_after(self, p, e):
         node = self._validate(p)
         return self.insert_between(e, node, node._next)
 
