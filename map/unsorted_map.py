@@ -27,8 +27,8 @@ class UnsortedMap(MapBase):
         self._table.append(self._Item(key, value))
 
     def __delitem__(self, key):
-        for item in self:
-            if item.key == key:
+        for i in range(len(self._table)):
+            if self._table[i].key == key:
                 self._table.pop(i)
                 return
 
