@@ -18,19 +18,17 @@ class MapBase(MutableMapping):
             return self.key < other.key
 
     def __len__(self):
-        pass
+        raise NotImplementedError("Not implemented.")
 
     def __getitem__(self, k):
-
-        pass
+        raise NotImplementedError("Not implemented.")
 
     def __setitem__(self, key, value):
-
-        pass
+        raise NotImplementedError("Not implemented.")
 
     def __delitem__(self, key):
-        pass
+        raise NotImplementedError("Not implemented.")
 
     def __iter__(self):
-        pass
+        raise NotImplementedError("Not implemented.")
 
