@@ -1,3 +1,6 @@
+import sys
+sys.path.append('.')
+
 from priority_queue_base_class import PriorityQueueBase
 from doubly_linked_positional_list import PositionalList
 
