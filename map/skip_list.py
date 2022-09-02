@@ -159,6 +159,7 @@ class SkipList(MapBase):
         if p.element().key == key:
             # overwrite the value
             p.element().value = value
+            return
 
         # Insert (k, v) after p
         q = None
@@ -226,6 +227,8 @@ if __name__ == "__main__":
     print(D.setdefault(57, 9))
     print(D.setdefault(55, 9))
     print(55 in D)
+    D[31] = 293
+    D[42] = 23
 
     for k, v in D.items():
         print(k, v)
