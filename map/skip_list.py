@@ -117,6 +117,9 @@ class SkipList(MapBase):
     def __len__(self):
         return self.size
 
+    def is_empty(self):
+        return len(self) == 0
+
     def __getitem__(self, key):
         """ Return the value of an item with key k """
         p = self.search(key)
@@ -201,6 +204,149 @@ class SkipList(MapBase):
             p = above
         self.size -= 1
 
+    def min_pos(self):
+        """ Return (k, v) pairs with the minimum key or None if it is empty. """
+        if self.is_empty():
+            return None
+
+        p = self.next(self.header)
+
+        return p
+
+    def find_min(self):
+        p = self.min_pos()
+        item = p.element()
+        return item.key, item.value
+
+    def max_pos(self):
+        if self.is_empty():
+            return None
+
+        walk = self.next(self.start)
+        while self.below(walk) is not None:
+            walk = self.below(walk)
+        walk = self.prev(walk)
+
+        return walk
+
+    def find_max(self):
+        """ Return (k, v) pairs with the maximum key or None if it is empty. """
+
+        p = self.max_pos()
+        if p is None:
+            return None
+        item = p.element()
+        return item.key, item.value
+
+    def _le_pos(self, key):
+        """ Return (k,v) with k <= key. """
+        p = self.search(key)
+        if self.prev(p) is None:
+            # sentinel location
+            return None
+        return p
+
+    def find_le(self, key):
+        """ Return (k,v) with k <= key. """
+        p = self._le_pos(key)
+        if p is not None:
+            node = p.element()
+            return node.key, node.value
+
+    def _lt_pos(self, key):
+        """ Return (k,v) with k < key. """
+        p = self.search(key)
+        if self.prev(p) is None:
+            # sentinel location
+            return None
+
+        if p.element().key != key:
+            return p
+        p = self.prev(p)
+        if D.prev(p) is not None:
+            # not sentinel
+            return p
+
+        return None
+
+    def find_lt(self, key):
+        """ Return (k,v) with k < key. """
+        p = self._lt_pos(key)
+        if p is None:
+            return None
+
+        item = p.element()
+        return item.key, item.value
+
+    def _gt_pos(self, key):
+        p = self.search(key)
+        walk = self.next(p)
+
+        while walk.element().key <= key:
+            walk = self.next(walk)
+
+        return walk
+
+    def find_gt(self, key):
+        """ Return (k, v) with key > k or None if it doesn't exist. """
+
+        walk = self._gt_pos(key)
+
+        if self.next(walk) is None:
+            # Sentinel location
+            return None
+
+        item = walk.element()
+        return item.key, item.value
+
+    def _ge_pos(self, key):
+        p = self.search(key)
+        walk = p
+        while walk.element().key < key:
+            walk = self.next(walk)
+
+        return walk
+
+    def find_ge(self, key):
+        """ Return (k, v) with key >= k or None if it doesn't exist. """
+        walk = self._ge_pos(key)
+        if self.next(walk) is None:
+            # Sentinel location
+            return None
+        item = walk.element()
+        return item.key, item.value
+
+    def find_range(self, start=None, stop=None):
+        """ Iterate through keys within [start, stop) """
+
+        if self.is_empty():
+            return None
+
+        if start is None:
+            p_start = self.min_pos()
+        else:
+            p_start = self._ge_pos(start)
+
+        if stop is None:
+            p_stop = self.next(self.max_pos())
+        else:
+            p_stop = self._le_pos(stop)
+
+        walk = p_start
+
+        while walk != p_stop:
+            item = walk.element()
+            yield item.key, item.value
+            walk = self.next(walk)
+
+    def __reversed__(self):
+        walk = self.max_pos()
+
+        if not self.is_empty():
+            while self.prev(walk) is not None:  # not sentinel node
+                yield walk.element().key
+                walk = self.prev(walk)
+
 
 if __name__ == "__main__":
     random.seed(0)
@@ -218,6 +364,7 @@ if __name__ == "__main__":
     D[39] = 2
     D[42] = 2
     D[38] = 2
+    D[-1] = 10
 
     print(D[50])
     print(D[44])
@@ -232,3 +379,24 @@ if __name__ == "__main__":
 
     for k, v in D.items():
         print(k, v)
+
+    print("------------ Sort Methods ------------")
+    print("min key: ", D.find_min())
+    print("max key: ", D.find_max())
+    print("find_le", D.find_le(-1))
+    print("find_lt", D.find_lt(-1))
+    print("find_lt", D.find_lt(-100))
+    print("find_gt", D.find_gt(55))
+    print("find_gt", D.find_gt(57))
+    print("find_ge", D.find_ge(54))
+
+    print("------------ Reverse Order ------------")
+    for k in reversed(D):
+        print(k)
+
+    print("------------ Range ------------")
+    for k, v in D.find_range():
+        print(k, v)
+
+
+
