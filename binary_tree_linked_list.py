@@ -24,7 +24,7 @@ class LinkedBinaryTree(BinaryTree):
         def __eq__(self, other):
             """ """
 
-            return self.node is other.node
+            return type(self) is type(other) and self.node is other.node
 
     def _validate(self, p):
         """ """
