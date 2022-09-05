@@ -190,6 +190,10 @@ class BinarySearchTree(MapBase):
             yield walk.element().key
             walk = self.before(walk)
 
+    def rebalance_insert(self, p): pass
+    def rebalance_delete(self, p): pass
+    def rebalance_access(self, p): pass
+
 
 if __name__ == "__main__":
     D = BinarySearchTree()
