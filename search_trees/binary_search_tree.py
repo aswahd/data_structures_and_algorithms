@@ -190,9 +190,63 @@ class BinarySearchTree(MapBase):
             yield walk.element().key
             walk = self.before(walk)
 
-    def rebalance_insert(self, p): pass
-    def rebalance_delete(self, p): pass
-    def rebalance_access(self, p): pass
+    # template functions for tree rebalancing
+    def _rebalance_insert(self, p): pass
+    def _rebalance_delete(self, p): pass
+    def _rebalance_access(self, p): pass
+
+    def _relink(self, parent, child, make_left_child):
+        """ Link child-parent"""
+
+        if make_left_child:
+            parent._left = child
+        else:
+            parent._right = child
+
+        if child is not None:
+            child._parent = parent
+
+    def _rotate(self, p):
+        """ Rotate position p with its parent. """
+        x = p._node
+        y = x._parent
+        z = y._parent
+
+        if z is None:
+            self.table._root = x
+            x._parent = None
+        else:
+            self._relink(z, x, y == z._left)
+
+        if x == y._left:
+            self._relink(y, x._right, True)   # make x._right the left child of y
+            self._relink(x, y, False)         # make y the right child of x
+        else:
+            self._relink(y, x._left, False)   # make x._left the right child of y
+            self._relink(x, y, True)
+
+    def _restructure(self, x):
+        """ Trinode balancing of a tree at position x. """
+        y = self.table.parent(x)
+        z = self.table.parent(y)
+
+        if (x == self.table.right(y)) == (y == self.table.right(z)):
+            # single rotation
+            # / z
+            # / y
+            # / x
+
+            # or
+            # \ z
+            # \ y
+            # \ x
+            self._rotate(y)
+            return y
+        else:
+            # double rotation
+            self._rotate(x)
+            self._rotate(x)
+            return x
 
 
 if __name__ == "__main__":
