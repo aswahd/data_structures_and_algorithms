@@ -129,14 +129,15 @@ class LinkedBinaryTree(BinaryTree):
 
         child = node._left if node._left else node._right
         parent = node._parent
-        child._parent = parent
-        old_value = parent._elem
+        if child is not None:
+            child._parent = parent
+        old_value = node._elem
         if parent is None:
             # p is a root node
             # then child becomes the root node
             self._root = child
         else:
-            if node._left:
+            if parent._left == node:
                 parent._left = child
             else:
                 parent._right = child
