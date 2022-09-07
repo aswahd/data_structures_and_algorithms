@@ -22,11 +22,10 @@ class BinarySearchTree(MapBase):
         if self.is_empty():
             raise KeyError("Key Error: " + repr(k))
         p = self.search(self.table.root(), k)
-
-        if k == p.element().key:
-            return p.element().value
-
-        raise KeyError("Key Error: " + repr(k))
+        self._rebalance_access(p)
+        if k != p.element().key:
+            raise KeyError("Key Error: " + repr(k))
+        return p.element().value
 
     def __setitem__(self, k, v):
         if self.is_empty():
@@ -117,12 +116,14 @@ class BinarySearchTree(MapBase):
 
         if k == p.element().key:
             p.element().value = v
+            self._rebalance_access(p)
         else:
             if k < p.element().key:
                 # insert on the left
-                self.table.add_left(p, self.Item(k, v))
+                leaf = self.table.add_left(p, self.Item(k, v))
             else:
-                self.table.add_right(p, self.Item(k, v))
+                leaf = self.table.add_right(p, self.Item(k, v))
+            self._rebalance_insert(leaf)
 
     def delete(self, key):
         """ Delete key. """
@@ -132,16 +133,16 @@ class BinarySearchTree(MapBase):
         if p.element().key != key:
             raise KeyError("Key Error: " + repr(key))
 
-        if self.table.num_children(p) < 2:
-            self.table.delete(p)
-        else:
+        if self.table.num_children(p) == 2:
             # p has left and right children
             # replace its value with what before it (the right most position of the
             # left subtree. The rightmost position has at most one child[i.e., left child].)
             r = self.before(p)
-            p.element().key = r.element().key
-            p.element().value = r.element.value
-            self.table.delete(r)
+            self.table.replace(p, r.element())
+            p = r
+        parent = self.table.parent(p)
+        self.table.delete(p)
+        self._rebalance_delete(parent)
 
     def first(self):
         """  Return the position containing the least key. """
@@ -172,7 +173,7 @@ class BinarySearchTree(MapBase):
         try:
             first = self.first()
             return first.element().key, first.element().value
-        except KeyError:
+        except AttributeError:
             return None
 
     def find_max(self):
@@ -180,7 +181,7 @@ class BinarySearchTree(MapBase):
         try:
             last = self.last()
             return last.element().key, last.element().value
-        except KeyError:
+        except AttributeError:
             return None
 
     def __reversed__(self):
@@ -265,7 +266,16 @@ if __name__ == "__main__":
     D[12] = 2
     D[38] = 21
     D[-1] = 10
-
+    print("------------ Deletion ------------")
+    print("len before deletion: ", len(D))
+    del D[50]
+    del D[31]
+    del D[-2]
+    del D[42]
+    del D[12]
+    del D[-1]
+    print("D[25] =", D[25])
+    print("len after deletion: ", len(D))
     print("------------ Sort Methods ------------")
     print("min key: ", D.find_min())
     print("max key: ", D.find_max())
