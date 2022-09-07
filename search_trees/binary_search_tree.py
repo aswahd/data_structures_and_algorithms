@@ -2,26 +2,19 @@ from binary_tree_linked_list import LinkedBinaryTree
 from map.map_base_class import MapBase
 
 
-class BinarySearchTree(MapBase):
-    class Item:
-        __slot__ = "key", "value"
+class BinarySearchTree(LinkedBinaryTree, MapBase):
 
-        def __init__(self, key, value) -> None:
-            self.key = key
-            self.value = value
+    class Position(LinkedBinaryTree.Position):
+        def key(self):
+            return self.element().key
 
-    def __init__(self) -> None:
-        super().__init__()
-
-        self.table = LinkedBinaryTree()
-
-    def __len__(self):
-        return len(self.table)
-
+        def value(self):
+            return self.element().value
+        
     def __getitem__(self, k):
         if self.is_empty():
             raise KeyError("Key Error: " + repr(k))
-        p = self.search(self.table.root(), k)
+        p = self.search(self.root(), k)
         self._rebalance_access(p)
         if k != p.element().key:
             raise KeyError("Key Error: " + repr(k))
@@ -29,7 +22,7 @@ class BinarySearchTree(MapBase):
 
     def __setitem__(self, k, v):
         if self.is_empty():
-            self.table.add_root(self.Item(k, v))
+            self.add_root(self._Item(k, v))
             return
 
         self.insert(k, v)
@@ -38,7 +31,7 @@ class BinarySearchTree(MapBase):
         if self.is_empty():
             raise KeyError("Key Error: " + repr(k))
 
-        self.delete(k)
+        self._delete(k)
 
     def __iter__(self):
         walk = self.first()
@@ -56,16 +49,16 @@ class BinarySearchTree(MapBase):
         inorder traversal.
         """
 
-        if self.table.left(p) is not None:
-            return self.last(self.table.left(p))
+        if self.left(p) is not None:
+            return self.last(self.left(p))
         else:
             # the first ancestor such that p is a right successor, comes before p.
             walk = p
-            ancestor = self.table.parent(walk)
+            ancestor = self.parent(walk)
 
-            while ancestor is not None and self.table.right(ancestor) != walk:
+            while ancestor is not None and self.right(ancestor) != walk:
                 walk = ancestor
-                ancestor = self.table.parent(walk)
+                ancestor = self.parent(walk)
 
             return ancestor
 
@@ -74,22 +67,22 @@ class BinarySearchTree(MapBase):
             in an inorder traversal.
         """
 
-        if self.table.right(p) is not None:
+        if self.right(p) is not None:
             # the leftmost child of the right child comes next. 
-            walk = self.table.right(p)
+            walk = self.right(p)
 
-            while self.table.left(walk) is not None:
-                walk = self.table.left(walk)
+            while self.left(walk) is not None:
+                walk = self.left(walk)
 
             return walk
 
         else:
             # the ancestor of p such that p is the left child comes next.
             walk = p
-            ancestor = self.table.parent(walk)
-            while ancestor is not None and walk != self.table.left(ancestor):
+            ancestor = self.parent(walk)
+            while ancestor is not None and walk != self.left(ancestor):
                 walk = ancestor
-                ancestor = self.table.parent(walk)
+                ancestor = self.parent(walk)
 
             return ancestor
 
@@ -98,50 +91,48 @@ class BinarySearchTree(MapBase):
             If key doesn't exist, return the position before/after it.
          """
 
-        node = self.table._validate(p)
-
-        if key == node._elem.key:
+        if key == p.key():
             return p
-        elif key < node._elem.key and self.table.left(p) is not None:
-            return self.search(self.table.left(p), key)
-        elif key > node._elem.key and self.table.right(p) is not None:
-            return self.search(self.table.right(p), key)
+        elif key < p.key() and self.left(p) is not None:
+            return self.search(self.left(p), key)
+        elif key > p.key() and self.right(p) is not None:
+            return self.search(self.right(p), key)
 
         return p
 
     def insert(self, k, v):
         """ Insert (k, v) at appropriate place. """
 
-        p = self.search(self.table.root(), k)
+        p = self.search(self.root(), k)
 
-        if k == p.element().key:
+        if k == p.key():
             p.element().value = v
             self._rebalance_access(p)
         else:
-            if k < p.element().key:
+            if k < p.key():
                 # insert on the left
-                leaf = self.table.add_left(p, self.Item(k, v))
+                leaf = self.add_left(p, self._Item(k, v))
             else:
-                leaf = self.table.add_right(p, self.Item(k, v))
+                leaf = self.add_right(p, self._Item(k, v))
             self._rebalance_insert(leaf)
 
-    def delete(self, key):
+    def _delete(self, key):
         """ Delete key. """
 
-        p = self.search(self.table.root(), key)
+        p = self.search(self.root(), key)
 
-        if p.element().key != key:
+        if p.key() != key:
             raise KeyError("Key Error: " + repr(key))
 
-        if self.table.num_children(p) == 2:
+        if self.num_children(p) == 2:
             # p has left and right children
             # replace its value with what before it (the right most position of the
             # left subtree. The rightmost position has at most one child[i.e., left child].)
             r = self.before(p)
-            self.table.replace(p, r.element())
+            self.replace(p, r.element())
             p = r
-        parent = self.table.parent(p)
-        self.table.delete(p)
+        parent = self.parent(p)
+        self.delete(p)
         self._rebalance_delete(parent)
 
     def first(self):
@@ -149,10 +140,10 @@ class BinarySearchTree(MapBase):
         if self.is_empty():
             return None
 
-        walk = self.table.root()
+        walk = self.root()
 
-        while self.table.left(walk) is not None:
-            walk = self.table.left(walk)
+        while self.left(walk) is not None:
+            walk = self.left(walk)
 
         return walk
 
@@ -161,10 +152,10 @@ class BinarySearchTree(MapBase):
         if self.is_empty():
             return None
         if p is None:
-            p = self.table.root()
+            p = self.root()
 
-        while self.table.right(p) is not None:
-            p = self.table.right(p)
+        while self.right(p) is not None:
+            p = self.right(p)
         return p
 
     def find_min(self):
@@ -209,12 +200,12 @@ class BinarySearchTree(MapBase):
 
     def _rotate(self, p):
         """ Rotate position p with its parent. """
-        x = p._node
+        x = p.node
         y = x._parent
         z = y._parent
 
         if z is None:
-            self.table._root = x
+            self._root = x
             x._parent = None
         else:
             self._relink(z, x, y == z._left)
@@ -228,10 +219,10 @@ class BinarySearchTree(MapBase):
 
     def _restructure(self, x):
         """ Trinode balancing of a tree at position x. """
-        y = self.table.parent(x)
-        z = self.table.parent(y)
+        y = self.parent(x)
+        z = self.parent(y)
 
-        if (x == self.table.right(y)) == (y == self.table.right(z)):
+        if (x == self.right(y)) == (y == self.right(z)):
             # single rotation
             # / z
             # / y
@@ -242,12 +233,12 @@ class BinarySearchTree(MapBase):
             # \ y
             # \ x
             self._rotate(y)
-            return y
+            return y     # new root of the subtree
         else:
             # double rotation
             self._rotate(x)
             self._rotate(x)
-            return x
+            return x     # new root of the subtree
 
 
 if __name__ == "__main__":
