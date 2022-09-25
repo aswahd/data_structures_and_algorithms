@@ -13,6 +13,10 @@ class Graph:
         def __hash__(self):
             return hash(id(self))
 
+        # def __repr__(self):
+        #     return f'{self._element}'
+
+
     class Edge:
         __slots__ = "_origin", "_destination", "_element"
 
@@ -33,6 +37,9 @@ class Graph:
 
         def __hash__(self):
             return hash((self._origin, self._destination))
+
+        # def __repr__(self):
+        #     return f'({self._origin._element}, {self._destination._element})'
 
     def __init__(self, directed=False):
         self.outgoing = {}
