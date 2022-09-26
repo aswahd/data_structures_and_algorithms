@@ -1,4 +1,4 @@
-from priority_queue_base_class import PriorityQueueBase
+from priority_queues.priority_queue_base_class import PriorityQueueBase
 
 
 class HeapPQ(PriorityQueueBase):
@@ -60,15 +60,18 @@ class HeapPQ(PriorityQueueBase):
                     smaller = right
 
             if self._data[smaller] < self._data[p]:
-                self._data[smaller], self._data[p] = self._data[p], self._data[smaller]
+                self.swap(smaller, p)
                 self.downheap_bubble(smaller)
+
+    def swap(self, i, j):
+        self._data[i], self._data[j] = self._data[j], self._data[i]
 
     def upheap_bubble(self, q):
         """ Upheap bubble the item at position q """
         p = self.parent(q)
         if q > 0 and self._data[q] < self._data[p]:
             # swap
-            self._data[p], self._data[q] = self._data[q], self._data[p]
+            self.swap(p, q)
             self.upheap_bubble(p)
 
     def add(self, k, v):
