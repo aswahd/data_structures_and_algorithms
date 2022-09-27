@@ -110,7 +110,7 @@ def reconstruct_path_tree(G, s, d):
 
 if __name__ == "__main__":
 
-    # Build graph with non-negative weights
+    # Build graph
     g = Graph()
     va = g.insert_vertex('a')
     vs = g.insert_vertex('s')
