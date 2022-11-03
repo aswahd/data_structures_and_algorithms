@@ -8,8 +8,7 @@ def all_construct(target_string, wordbank, memo=None):
         if word == target_string[:len(word)]:
             new_target = target_string[len(word):]
             ways_to_construct = all_construct(new_target, wordbank, memo)
-            for way in ways_to_construct:
-                way.insert(0, word)
+            ways_to_construct = [[word] + way for way in ways_to_construct]
             all_ways_to_construct.extend(ways_to_construct)
     memo[target_string] = all_ways_to_construct
     return all_ways_to_construct
